@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=375, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<title>外盘数据早知道 · 展位图 V3</title>
+<style>
+  :root{
+    --gold:#C8A063;
+    --gold-2:#E6C58A;
+    --red:#C8102E;
+    --orange:#F86938;
+    --orange-bg:#FFF1E8;
+    --moon:#F7F4EC;
+    --ink:#1B2A4E;
+    --ink-2:#3B4A6B;
+    --line:rgba(27,42,78,.08);
+    --green-up:#1A8754;
+    --red-down:#C8102E;
+    --shadow:0 8px 24px rgba(27,42,78,.10);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;background:#EDE7DA;color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei","Source Han Sans SC",sans-serif;
+    -webkit-font-smoothing:antialiased;}
+  body{display:flex;justify-content:center;}
+  .phone{position:relative;width:375px;min-height:100vh;background:var(--moon);overflow:hidden;}
+
+  /* ===== 头图 ===== */
+  .hero{padding:32px 20px 24px;text-align:center;
+    background:linear-gradient(180deg,#15233F 0%,#1B2A4E 100%);color:#fff;
+    position:relative;overflow:hidden;}
+  .hero::before{content:"";position:absolute;left:-40px;top:-40px;width:180px;height:180px;border-radius:50%;
+    background:radial-gradient(circle at 35% 35%, #FFF6E0 0%, #F2D9A1 60%, #C8A063 100%);
+    opacity:.18;filter:blur(2px);}
+  .hero h1{margin:0;font-size:24px;font-weight:700;letter-spacing:2px;
+    font-family:"Source Han Serif SC","Songti SC","STSong",serif;
+    background:linear-gradient(180deg,#FFF1CE 0%,#E6C58A 60%,#C8A063 100%);
+    -webkit-background-clip:text;background-clip:text;color:transparent;
+    position:relative;z-index:1;}
+  .hero .sub{margin-top:10px;font-size:12px;color:rgba(230,197,138,.85);letter-spacing:3px;position:relative;z-index:1;}
+
+  section{position:relative;padding:0 16px;}
+  .card{background:#fff;border-radius:16px;box-shadow:var(--shadow);}
+
+  /* ===== ② 外盘追踪器 ===== */
+  .overseas{padding-top:6px;}
+  .overseas .head{padding:20px 4px 12px;display:flex;align-items:center;justify-content:space-between;}
+  .overseas .head .left{display:flex;align-items:center;}
+  .overseas .head h3{margin:0;font-size:18px;font-weight:700;font-family:"Source Han Serif SC",serif;}
+  .overseas .head .bar{width:4px;height:16px;background:var(--gold);border-radius:2px;margin-right:8px;}
+  .overseas .head .tip{font-size:11px;color:var(--ink-2);background:rgba(200,160,99,.12);
+    border:1px solid rgba(200,160,99,.35);border-radius:99px;padding:3px 8px;}
+  .overseas .intro{font-size:12px;color:var(--ink-2);line-height:1.7;margin:0 4px 12px;}
+  .overseas .intro b{color:var(--ink);}
+  .table-card{padding:8px 0 4px;}
+  .table-card table{width:100%;border-collapse:collapse;font-size:12px;}
+  .table-card thead th{font-weight:600;color:#fff;background:var(--ink);padding:8px 6px;font-size:11px;
+    text-align:left;letter-spacing:.5px;}
+  .table-card thead th:first-child{border-top-left-radius:10px;}
+  .table-card thead th:last-child{border-top-right-radius:10px;text-align:right;}
+  .table-card tbody td{padding:10px 6px;border-bottom:1px solid var(--line);color:var(--ink);}
+  .table-card tbody tr:last-child td{border-bottom:none;}
+  .table-card tbody td:first-child{font-weight:600;}
+  .table-card tbody td:last-child{text-align:right;}
+  .table-card .up{color:var(--green-up);font-weight:700;}
+  .table-card .down{color:var(--red-down);font-weight:700;}
+  .table-card .tag{display:inline-block;padding:2px 6px;font-size:10px;border-radius:4px;margin-right:4px;
+    background:rgba(26,135,84,.10);color:var(--green-up);}
+  .table-card .tag.risk{background:rgba(200,16,46,.10);color:var(--red-down);}
+  .overseas .time{margin:8px 4px 0;font-size:11px;color:var(--ink-2);}
+
+  /* ===== ③ 分析师快评 ===== */
+  .flash{padding-top:6px;}
+  .flash .head{padding:20px 4px 12px;display:flex;align-items:center;justify-content:space-between;}
+  .flash .head .left{display:flex;align-items:center;}
+  .flash .head h3{margin:0;font-size:18px;font-weight:700;font-family:"Source Han Serif SC",serif;}
+  .flash .head .bar{width:4px;height:16px;background:var(--orange);border-radius:2px;margin-right:8px;}
+  .flash .head .badge-live{display:inline-flex;align-items:center;font-size:10px;color:var(--orange);
+    background:var(--orange-bg);border:1px solid rgba(248,105,56,.4);border-radius:99px;padding:2px 8px;
+    margin-left:6px;font-weight:600;}
+  .flash .head .badge-live i{width:5px;height:5px;border-radius:50%;background:var(--orange);margin-right:4px;
+    animation:pulse 1.2s infinite;}
+  @keyframes pulse{0%,100%{opacity:.4;}50%{opacity:1;}}
+  .flash .head .more{font-size:12px;color:var(--ink-2);}
+  .flash .head .more::after{content:" →";color:var(--orange);}
+  .flash .intro{font-size:12px;color:var(--ink-2);line-height:1.7;margin:0 4px 12px;}
+  .flash .intro b{color:var(--ink);}
+
+  .flash-track{
+    position:relative;
+    margin:0 -16px;
+    padding:2px 16px 14px;
+    overflow-x:auto;
+    scroll-snap-type:x mandatory;
+    -webkit-overflow-scrolling:touch;
+    display:flex;
+  }
+  .flash-track::-webkit-scrollbar{display:none;}
+  .flash-card{
+    scroll-snap-align:start;
+    flex:0 0 calc(100% - 32px);
+    background:#fff;border-radius:16px;
+    padding:14px 14px 12px;
+    box-shadow:var(--shadow);
+    margin-right:12px;
+  }
+  .flash-card:last-child{margin-right:16px;}
+
+  .flash-top{display:flex;align-items:flex-start;}
+  .flash-label{flex:0 0 auto;font-size:11px;font-weight:700;color:#fff;background:var(--orange);
+    border-radius:6px;padding:3px 8px;letter-spacing:1px;margin-right:8px;}
+  .flash-title{margin:0;font-size:15px;font-weight:700;color:var(--ink);line-height:1.4;
+    flex:1;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:1;-webkit-box-orient:vertical;}
+  .flash-time{flex:0 0 auto;font-size:11px;color:var(--ink-2);margin-left:8px;white-space:nowrap;
+    font-family:"DIN Alternate",sans-serif;}
+
+  .flash-body{margin-top:10px;display:flex;align-items:flex-start;}
+  .flash-summary{flex:1;font-size:13px;color:var(--ink-2);line-height:1.6;
+    display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;margin:0;}
+  .flash-headset{flex:0 0 auto;width:36px;height:36px;border-radius:50%;
+    background:var(--orange-bg);display:flex;align-items:center;justify-content:center;margin-left:10px;
+    font-size:18px;}
+
+  .flash-bottom{display:flex;gap:10px;margin-top:12px;}
+  .flash-author{flex:1;background:#F4F0E8;border-radius:6px;padding:6px 10px;font-size:11px;color:var(--ink-2);}
+  .flash-author b{color:var(--ink);font-weight:600;}
+  .flash-symbol{flex:0 0 auto;background:#F4F0E8;border-radius:6px;padding:6px 10px;font-size:11px;
+    display:flex;align-items:center;}
+  .flash-symbol .name{color:var(--ink-2);margin-right:4px;}
+  .flash-symbol .ch{font-weight:700;}
+  .flash-symbol .ch.up{color:var(--green-up);}
+  .flash-symbol .ch.down{color:var(--red-down);}
+  .flash-symbol .arrow{margin-left:4px;color:var(--gold);font-size:10px;}
+
+  .flash-dots{display:flex;justify-content:center;gap:6px;margin-top:6px;}
+  .flash-dots i{width:5px;height:5px;border-radius:50%;background:rgba(248,105,56,.25);}
+  .flash-dots i.active{width:16px;background:var(--orange);border-radius:99px;}
+
+  /* ===== ④ 假期要闻 ===== */
+  .news{padding-top:6px;}
+  .news .head{padding:20px 4px 12px;}
+  .news .head .bar{width:4px;height:16px;background:var(--gold);border-radius:2px;margin-right:8px;}
+  .news .head h3{margin:0;font-size:18px;font-weight:700;font-family:"Source Han Serif SC",serif;}
+  .news .intro{font-size:12px;color:var(--ink-2);line-height:1.7;margin:0 4px 12px;}
+  .timeline{position:relative;padding-left:18px;}
+  .timeline::before{content:"";position:absolute;left:5px;top:6px;bottom:6px;width:2px;
+    background:linear-gradient(180deg,var(--gold) 0%,rgba(200,160,99,.2) 100%);}
+  .news-item{position:relative;background:#fff;border-radius:14px;padding:12px 14px;margin-bottom:12px;
+    box-shadow:var(--shadow);}
+  .news-item::before{content:"";position:absolute;left:-18px;top:16px;width:10px;height:10px;
+    border-radius:50%;background:var(--gold);box-shadow:0 0 0 3px var(--moon);}
+  .news-item .meta{display:flex;align-items:center;font-size:11px;color:var(--ink-2);margin-bottom:6px;}
+  .news-item .meta .t{margin-right:8px;}
+  .news-item .meta .tag{font-size:10px;padding:2px 6px;border-radius:4px;color:#fff;}
+  .news-item .meta .tag.macro{background:#C8A063;}
+  .news-item .meta .tag.foreign{background:#2F5BAA;}
+  .news-item .meta .tag.domestic{background:#C8102E;}
+  .news-item .meta .tag.industry{background:#7A7E8C;}
+  .news-item h4{margin:0 0 4px;font-size:14px;font-weight:600;color:var(--ink);line-height:1.5;}
+  .news-item p{margin:0;font-size:12px;color:var(--ink-2);line-height:1.6;}
+  .news-item.lead{background:linear-gradient(135deg,#FFF8EA 0%,#fff 100%);border:1px solid rgba(200,160,99,.45);}
+  .news-item.lead::before{background:var(--red);box-shadow:0 0 0 3px var(--moon),0 0 0 6px rgba(200,16,46,.15);}
+  .news-item.lead .badge{position:absolute;top:10px;right:10px;font-size:10px;color:var(--red);
+    background:rgba(200,16,46,.08);border:1px solid rgba(200,16,46,.25);border-radius:4px;padding:1px 6px;}
+
+  /* ===== ⑤ 直播直击 ===== */
+  .live{padding-top:6px;}
+  .live .head{padding:20px 4px 12px;}
+  .live .head .bar{width:4px;height:16px;background:var(--gold);border-radius:2px;margin-right:8px;}
+  .live .head h3{margin:0;font-size:18px;font-weight:700;font-family:"Source Han Serif SC",serif;}
+  .live .intro{font-size:12px;color:var(--ink-2);line-height:1.7;margin:0 4px 12px;}
+  .live-main{position:relative;border-radius:16px;overflow:hidden;color:#fff;
+    background:
+      linear-gradient(135deg,rgba(27,42,78,.65),rgba(27,42,78,.4)),
+      radial-gradient(circle at 70% 30%, #4A5A85 0%, #1B2A4E 80%);
+    box-shadow:var(--shadow);}
+  .live-main .badge{position:absolute;top:12px;right:12px;font-size:10px;color:var(--gold);
+    border:1px solid var(--gold);border-radius:4px;padding:2px 6px;letter-spacing:1px;
+    background:rgba(0,0,0,.2);backdrop-filter:blur(4px);}
+  .live-main .live-dot{position:absolute;top:12px;left:12px;display:flex;align-items:center;
+    font-size:11px;color:#fff;background:rgba(200,16,46,.85);padding:3px 8px;border-radius:99px;}
+  .live-main .live-dot i{width:6px;height:6px;border-radius:50%;background:#fff;margin-right:5px;}
+  .live-main .body{padding:130px 16px 16px;}
+  .live-main h4{margin:0;font-size:17px;font-weight:700;letter-spacing:.5px;}
+  .live-main .meta{margin-top:6px;font-size:12px;color:rgba(255,255,255,.85);}
+  .live-main .host{display:flex;align-items:center;margin-top:14px;}
+  .live-main .avatar{width:36px;height:36px;border-radius:50%;
+    background:linear-gradient(135deg,var(--gold) 0%,#fff 100%);color:var(--ink);display:flex;
+    align-items:center;justify-content:center;font-weight:700;font-size:14px;border:2px solid rgba(255,255,255,.6);}
+  .live-main .host .info{margin-left:10px;}
+  .live-main .host .info .name{font-size:13px;font-weight:600;}
+  .live-main .host .info .role{font-size:11px;color:rgba(255,255,255,.7);margin-top:2px;}
+  .live-main .cta{margin-top:14px;display:flex;}
+  .live-main .btn{flex:1;height:40px;border-radius:99px;display:flex;align-items:center;justify-content:center;
+    font-size:14px;font-weight:600;letter-spacing:1px;}
+  .live-main .btn.primary{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-2) 100%);color:var(--ink);
+    box-shadow:0 4px 12px rgba(200,160,99,.45);}
+  .live-list{display:flex;gap:10px;margin-top:12px;}
+  .live-card{flex:1;background:#fff;border-radius:14px;padding:12px;box-shadow:var(--shadow);
+    position:relative;overflow:hidden;}
+  .live-card .img{height:70px;border-radius:8px;margin-bottom:8px;
+    background:linear-gradient(135deg,#1B2A4E 0%,#4A5A85 100%);position:relative;overflow:hidden;}
+  .live-card .img::after{content:"";position:absolute;left:50%;top:50%;width:24px;height:24px;border-radius:50%;
+    background:rgba(255,255,255,.85);transform:translate(-50%,-50%);
+    box-shadow:0 0 0 6px rgba(255,255,255,.18);}
+  .live-card .img::before{content:"";position:absolute;left:55%;top:50%;width:0;height:0;
+    border-left:7px solid var(--ink);border-top:5px solid transparent;border-bottom:5px solid transparent;
+    transform:translateY(-50%);z-index:1;}
+  .live-card h5{margin:0 0 4px;font-size:13px;font-weight:600;color:var(--ink);line-height:1.4;}
+  .live-card .time{font-size:11px;color:var(--ink-2);}
+  .live-card .mini{display:flex;align-items:center;margin-top:8px;}
+  .live-card .mini .avatar{width:22px;height:22px;border-radius:50%;background:var(--gold);color:#fff;
+    display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;}
+  .live-card .mini .nm{margin-left:6px;font-size:11px;color:var(--ink-2);}
+  .live-card .btn2{margin-top:8px;height:30px;border:1px solid var(--gold);color:var(--ink);border-radius:99px;
+    display:flex;align-items:center;justify-content:center;font-size:12px;}
+
+  /* ===== ⑥ 双节打卡（联动积分商城） ===== */
+  .checkin{padding-top:6px;}
+  .checkin .head{padding:20px 4px 12px;}
+  .checkin .head .bar{width:4px;height:16px;background:var(--gold);border-radius:2px;margin-right:8px;}
+  .checkin .head h3{margin:0;font-size:18px;font-weight:700;font-family:"Source Han Serif SC",serif;}
+  .checkin .intro{font-size:12px;color:var(--ink-2);line-height:1.7;margin:0 4px 12px;}
+  .checkin-card{padding:16px;}
+  .checkin-summary{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:12px;}
+  .checkin-summary .points{font-size:24px;font-weight:700;color:var(--ink);font-family:"DIN Alternate",sans-serif;
+    letter-spacing:1px;}
+  .checkin-summary .points small{font-size:12px;color:var(--ink-2);font-weight:400;margin-left:6px;letter-spacing:0;}
+  .checkin-summary .lottery{font-size:11px;color:var(--orange);background:var(--orange-bg);
+    border:1px solid rgba(248,105,56,.4);border-radius:99px;padding:4px 10px;text-decoration:none;}
+  .checkin-summary .lottery::after{content:" →";}
+  .progress{display:flex;align-items:flex-start;justify-content:space-between;margin:8px 0 16px;
+    position:relative;}
+  .progress::before{content:"";position:absolute;left:14px;right:14px;top:14px;height:2px;
+    background:rgba(200,160,99,.25);}
+  .progress .fill{position:absolute;left:14px;top:14px;height:2px;background:var(--gold);
+    width:calc((100% - 28px) * 3 / 6);border-radius:2px;}
+  .day{display:flex;flex-direction:column;align-items:center;flex:1;position:relative;}
+  .day .dot{width:28px;height:28px;border-radius:50%;background:#fff;border:2px solid rgba(200,160,99,.35);
+    display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--ink-2);font-weight:700;
+    position:relative;z-index:1;}
+  .day.done .dot{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-2) 100%);
+    color:#fff;border-color:var(--gold);box-shadow:0 4px 10px rgba(200,160,99,.45);}
+  .day.fest .dot{width:36px;height:36px;font-size:14px;background:linear-gradient(135deg,#FFD27A 0%,#E63946 100%);
+    color:#fff;border-color:#E63946;box-shadow:0 0 0 4px rgba(230,57,70,.15);}
+  .day .lbl{margin-top:6px;font-size:10px;color:var(--ink-2);}
+  .day.fest .lbl{color:var(--red);font-weight:600;}
+  .day.done .lbl{color:var(--ink);}
+  .checkin .rule{font-size:11px;color:var(--ink-2);line-height:1.7;margin:8px 4px 0;}
+  .checkin .cta-row{display:flex;gap:10px;margin-top:14px;}
+  .checkin .cta-row .btn{flex:1;height:44px;border-radius:99px;display:flex;align-items:center;justify-content:center;
+    font-size:14px;font-weight:600;letter-spacing:1px;}
+  .checkin .cta-row .btn.primary{background:linear-gradient(135deg,var(--gold) 0%,var(--gold-2) 100%);color:var(--ink);
+    box-shadow:0 6px 16px rgba(200,160,99,.45);}
+  .checkin .cta-row .btn.primary.done{background:#E5E5E5;color:var(--ink-2);box-shadow:none;}
+  .checkin .cta-row .btn.ghost{background:#fff;color:var(--orange);border:1px solid var(--orange);}
+
+  /* ===== ⑦ 尾图 ===== */
+  footer{padding:24px 24px 28px;margin-top:24px;text-align:center;
+    background:linear-gradient(180deg,#F7F4EC 0%,#EDE7DA 100%);
+    border-top:1px solid rgba(27,42,78,.06);}
+  footer .risk{font-size:12px;color:var(--ink-2);line-height:1.8;letter-spacing:1px;}
+  footer .risk b{color:var(--ink);}
+</style>
+</head>
+<body>
+<div class="phone">
+
+  <!-- ① 头图 -->
+  <section class="hero">
+    <h1>外盘数据早知道</h1>
+    <div class="sub">双节专题 · 假期不打烊</div>
+  </section>
+
+  <!-- ② 外盘追踪器 -->
+  <section class="overseas">
+    <div class="head">
+      <div class="left"><span class="bar"></span><h3>外盘追踪器</h3></div>
+      <span class="tip">节后机会先知道</span>
+    </div>
+    <p class="intro">假期外盘不停盘，<b>波动就是节后的入场券</b>。重点关注以下品种：</p>
+    <div class="card table-card">
+      <table>
+        <thead>
+          <tr><th>品种</th><th>最新价</th><th>假期涨跌</th><th style="text-align:right;">节后关注</th></tr>
+        </thead>
+        <tbody>
+          <tr><td>黄金</td><td>$2,658.4</td><td class="up">+1.82%</td><td style="text-align:right;"><span class="tag">⚡ 避险延续</span></td></tr>
+          <tr><td>WTI 原油</td><td>$74.31</td><td class="up">+3.45%</td><td style="text-align:right;"><span class="tag">⚡ OPEC+ 利好</span></td></tr>
+          <tr><td>美元指数</td><td>100.42</td><td class="down">-0.96%</td><td style="text-align:right;"><span class="tag">⚡ 人民币资产</span></td></tr>
+          <tr><td>伦铜</td><td>$9,725</td><td class="up">+2.18%</td><td style="text-align:right;"><span class="tag">⚡ 工业品补涨</span></td></tr>
+          <tr><td>美豆</td><td>1,056¢</td><td class="down">-2.34%</td><td style="text-align:right;"><span class="tag risk">⚠ 丰产压力</span></td></tr>
+          <tr><td>比特币</td><td>$63,210</td><td class="up">+5.62%</td><td style="text-align:right;"><span class="tag">⚡ 风险偏好</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+    <p class="time">数据截至 10 月 04 日 22:00（北京时间），点击查看完整外盘行情 →</p>
+  </section>
+
+  <!-- ③ 分析师快评（新增，置于假期要闻之前） -->
+  <section class="flash">
+    <div class="head">
+      <div class="left"><span class="bar"></span><h3>分析师快评</h3>
+        <span class="badge-live"><i></i>在线 3 条</span>
+      </div>
+      <span class="more">查看历史</span>
+    </div>
+    <p class="intro">实时点评，<b>在线 24 小时</b>自动消散，左右滑动查看更多。</p>
+
+    <div class="flash-track" id="flashTrack">
+      <div class="flash-card">
+        <div class="flash-top">
+          <span class="flash-label">快评</span>
+          <p class="flash-title">重启加息，利好落尽还是继续埋…</p>
+          <span class="flash-time">11:03</span>
+        </div>
+        <div class="flash-body">
+          <p class="flash-summary">北京时间 9 月 17 日凌晨，美联储公布了 9 月议息会议结果。一、利率决议结果（1）加息了。</p>
+          <div class="flash-headset">🎧</div>
+        </div>
+        <div class="flash-bottom">
+          <div class="flash-author"><b>张驰宁</b> · 市场分析师</div>
+          <div class="flash-symbol">
+            <span class="name">沪金</span>
+            <span class="ch down">-0.49%</span>
+            <span class="arrow">▸</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flash-card">
+        <div class="flash-top">
+          <span class="flash-label">快评</span>
+          <p class="flash-title">原油短线冲高乏力，回踩支撑关注…</p>
+          <span class="flash-time">09:42</span>
+        </div>
+        <div class="flash-body">
+          <p class="flash-summary">OPEC+ 延长减产决议落地后买盘兑现，WTI 在 75 美元一线承压。关注今晚 EIA 库存指引短线方向。</p>
+          <div class="flash-headset">🎧</div>
+        </div>
+        <div class="flash-bottom">
+          <div class="flash-author"><b>陈昊</b> · 能源分析师</div>
+          <div class="flash-symbol">
+            <span class="name">原油</span>
+            <span class="ch up">+0.83%</span>
+            <span class="arrow">▸</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="flash-card">
+        <div class="flash-top">
+          <span class="flash-label">快评</span>
+          <p class="flash-title">美元指数破位下行，人民币资产…</p>
+          <span class="flash-time">08:15</span>
+        </div>
+        <div class="flash-body">
+          <p class="flash-summary">DXY 跌破 100 关口，外资流入新兴市场迹象明显。节后 A 股、港股或迎来估值修复窗口。</p>
+          <div class="flash-headset">🎧</div>
+        </div>
+        <div class="flash-bottom">
+          <div class="flash-author"><b>李婉清</b> · 宏观分析师</div>
+          <div class="flash-symbol">
+            <span class="name">美元</span>
+            <span class="ch down">-0.62%</span>
+            <span class="arrow">▸</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flash-dots" id="flashDots">
+      <i class="active"></i><i></i><i></i>
+    </div>
+  </section>
+
+  <!-- ④ 假期要闻 -->
+  <section class="news">
+    <div class="head"><span class="bar"></span><h3>假期要闻</h3></div>
+    <p class="intro">假期不打烊，<b>全球大事每日为您整理</b>。点击查看更多要闻 →</p>
+    <div class="timeline">
+      <div class="news-item lead">
+        <span class="badge">最新</span>
+        <div class="meta"><span class="t">10-04 09:30</span><span class="tag macro">宏观</span></div>
+        <h4>美联储官员讲话释放降息信号</h4>
+        <p>鲍威尔在最新讲话中重申对通胀回归 2% 的信心，市场押注 11 月降息 25bp 概率升至 78%。</p>
+      </div>
+      <div class="news-item">
+        <div class="meta"><span class="t">10-03 21:00</span><span class="tag foreign">外盘·原油</span></div>
+        <h4>EIA 库存意外大降，油价创近期新高</h4>
+        <p>美国商业原油库存下降 460 万桶，远超预期，WTI 原油突破 74 美元/桶。</p>
+      </div>
+      <div class="news-item">
+        <div class="meta"><span class="t">10-03 10:15</span><span class="tag domestic">内盘</span></div>
+        <h4>交易所发布节后交易日历与保证金调整通知</h4>
+        <p>SHFE、INE 等多家交易所公布 10 月 8 日恢复交易参数，部分品种保证金比例上调 1–2%。</p>
+      </div>
+      <div class="news-item">
+        <div class="meta"><span class="t">10-02 14:20</span><span class="tag industry">行业</span></div>
+        <h4>巴西大豆主产区天气改善，丰产预期增强</h4>
+        <p>气象模型显示未来两周降雨充沛，美豆主力承压回落，关注节后进口成本传导。</p>
+      </div>
+      <div class="news-item">
+        <div class="meta"><span class="t">10-02 08:30</span><span class="tag macro">宏观</span></div>
+        <h4>欧元区 9 月 PMI 跌破荣枯线</h4>
+        <p>制造业 PMI 录得 49.2，服务业 51.4，欧元兑美元盘中跌至 1.1020。</p>
+      </div>
+      <div class="news-item">
+        <div class="meta"><span class="t">10-01 19:00</span><span class="tag foreign">外盘·贵金属</span></div>
+        <h4>黄金创历史新高，中东局势推升避险需求</h4>
+        <p>伦敦金现突破 2,650 美元/盎司，白银跟随上涨 3.1%，节后沪金沪银关注高开风险。</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑤ 直播直击 -->
+  <section class="live">
+    <div class="head"><span class="bar"></span><h3>直播直击</h3></div>
+    <p class="intro">团圆之外，<b>还有一场专业陪伴</b>。分析师在线解读。</p>
+    <div class="live-main">
+      <span class="live-dot"><i></i>即将开播</span>
+      <span class="badge">月圆话交易</span>
+      <div class="body">
+        <h4>《节后首周交易策略前瞻》</h4>
+        <div class="meta">10 月 07 日（周一）20:00 · 时长 60 分钟</div>
+        <div class="host">
+          <div class="avatar">李</div>
+          <div class="info">
+            <div class="name">李老师 · 首席宏观分析师</div>
+            <div class="role">从业 12 年 · 央视财经特约评论</div>
+          </div>
+        </div>
+        <div class="cta">
+          <div class="btn primary">立即预约</div>
+        </div>
+      </div>
+    </div>
+    <div class="live-list">
+      <div class="live-card">
+        <div class="img"></div>
+        <h5>《外盘波动品种深度复盘》</h5>
+        <div class="time">10-06 10:30 · 张老师</div>
+        <div class="mini"><div class="avatar">张</div><div class="nm">张老师 · 高级能化分析师</div></div>
+        <div class="btn2">查看详情</div>
+      </div>
+      <div class="live-card">
+        <div class="img"></div>
+        <h5>《贵金属节后行情展望》</h5>
+        <div class="time">10-06 15:00 · 王老师</div>
+        <div class="mini"><div class="avatar">王</div><div class="nm">王老师 · 贵金属研究员</div></div>
+        <div class="btn2">查看详情</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑥ 双节打卡（联动积分商城） -->
+  <section class="checkin">
+    <div class="head"><span class="bar"></span><h3>双节打卡</h3></div>
+    <p class="intro">团圆不落单，<b>积分天天涨</b>。签到同步积分商城。</p>
+    <div class="card checkin-card">
+      <div class="checkin-summary">
+        <div class="points">968<small>我的积分</small></div>
+        <a class="lottery" href="#">积分抽奖赢好礼</a>
+      </div>
+      <div class="progress">
+        <div class="fill"></div>
+        <div class="day done"><div class="dot">✓</div><div class="lbl">10-01</div></div>
+        <div class="day done"><div class="dot">✓</div><div class="lbl">10-02</div></div>
+        <div class="day done"><div class="dot">✓</div><div class="lbl">10-03</div></div>
+        <div class="day fest"><div class="dot">月</div><div class="lbl">10-04 中秋</div></div>
+        <div class="day"><div class="dot">5</div><div class="lbl">10-05</div></div>
+        <div class="day fest"><div class="dot">国</div><div class="lbl">10-06 国庆</div></div>
+        <div class="day"><div class="dot">7</div><div class="lbl">10-07</div></div>
+      </div>
+      <p class="rule">※ 签到同步至积分商城，<b>不发放连续打卡奖励</b>，欢迎前往积分商城抽奖。</p>
+      <div class="cta-row">
+        <div class="btn primary done">今日已签到</div>
+        <div class="btn ghost">去积分抽奖</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ⑦ 尾图 -->
+  <footer>
+    <p class="risk"><b>投资有风险，入市需谨慎</b><br/>本页面所列品种价格、资讯及直播内容仅供参考，不构成任何投资建议。</p>
+  </footer>
+
+</div>
+
+<script>
+  (function(){
+    const track = document.getElementById('flashTrack');
+    const dots = document.getElementById('flashDots').querySelectorAll('i');
+    if(!track) return;
+    track.addEventListener('scroll', function(){
+      const cards = track.querySelectorAll('.flash-card');
+      const w = cards[0].offsetWidth + 12;
+      const idx = Math.round(track.scrollLeft / w);
+      dots.forEach((d,i)=>d.classList.toggle('active', i===idx));
+    });
+  })();
+</script>
+</body>
+</html>

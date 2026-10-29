@@ -1,0 +1,6 @@
+{
+  "name": "外盘数据早知道·期货小长假热点专题系统",
+  "description": "期货公司小长假热点专题H5运营系统与用户端原型：包含运营配置后台、PRD产品文档、外盘行情追踪、分析师快评、假期要闻、直播直击与打卡有礼模块。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
