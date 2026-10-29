@@ -30,7 +30,6 @@ export const initialOverseasTrackers: OverseasTrackerItem[] = [
   { id: 'tracker-4', exchange: 'CBOT', name: '美豆', focusType: 'risk', focusText: '', lastPrice: '1024.5', changePercent: '-1.15%' },
   { id: 'tracker-5', exchange: 'NYMEX', name: '天然气', focusType: 'risk', focusText: '', lastPrice: '2.458', changePercent: '-2.45%' },
   { id: 'tracker-6', exchange: 'ICUS', name: '美元指数', focusType: 'opportunity', focusText: '', lastPrice: '101.45', changePercent: '+0.12%' },
-  { id: 'tracker-7', exchange: 'COMEX', name: '白银', focusType: 'neutral', focusText: '', lastPrice: '31.25', changePercent: '0.00%' },
 ];
 
 export const initialAnalysts: AnalystComment[] = [

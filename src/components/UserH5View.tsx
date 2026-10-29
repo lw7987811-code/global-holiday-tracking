@@ -211,7 +211,7 @@ export const UserH5View: React.FC<UserH5ViewProps> = ({
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {(() => {
-                    const displayTrackers = liveTrackers;
+                    const displayTrackers = liveTrackers.slice(0, 6);
 
                     return displayTrackers.map(t => {
                       const isUp = t.changePercent?.startsWith('+');
