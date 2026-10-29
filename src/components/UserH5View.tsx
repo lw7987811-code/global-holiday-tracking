@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { AppConfig, OverseasTrackerItem, AnalystComment, HolidayNewsItem, LiveStreamItem, CheckInDay } from '../types';
 import { Headphones, Check, Play, ChevronDown } from 'lucide-react';
 
@@ -33,9 +33,71 @@ export const UserH5View: React.FC<UserH5ViewProps> = ({
   const [activeAnalystIdx, setActiveAnalystIdx] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // Real-time market tick state
+  const [liveTrackers, setLiveTrackers] = useState<OverseasTrackerItem[]>(trackers);
+
+  useEffect(() => {
+    setLiveTrackers(trackers);
+  }, [trackers]);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setLiveTrackers(prev => {
+        if (!prev || prev.length === 0) return prev;
+
+        const randomIndex = Math.floor(Math.random() * prev.length);
+        const item = prev[randomIndex];
+        const currentPrice = parseFloat(item.lastPrice || '100');
+        if (isNaN(currentPrice)) return prev;
+
+        const isUp = Math.random() > 0.46;
+        const percentDelta = (Math.random() * 0.28 + 0.05) * (isUp ? 1 : -1);
+        const priceDelta = currentPrice * (percentDelta / 100);
+        const newPrice = currentPrice + priceDelta;
+
+        let decimals = 2;
+        if (currentPrice > 1000) decimals = 1;
+        else if (currentPrice < 10) decimals = 3;
+
+        const formattedPrice = newPrice.toFixed(decimals);
+
+        const currentPct = parseFloat(item.changePercent?.replace('%', '') || '0');
+        const newPct = currentPct + percentDelta;
+        const formattedPct = `${newPct >= 0 ? '+' : ''}${newPct.toFixed(2)}%`;
+
+        return prev.map((t, idx) => {
+          if (idx === randomIndex) {
+            return {
+              ...t,
+              lastPrice: formattedPrice,
+              changePercent: formattedPct,
+            };
+          }
+          return t;
+        });
+      });
+    }, 1800);
+
+    return () => clearInterval(timer);
+  }, []);
+
   const showToast = (msg: string) => {
     setToastMessage(msg);
     setTimeout(() => setToastMessage(null), 2500);
+  };
+
+  const renderDateTimeMultiline = (timeStr: string) => {
+    if (!timeStr) return null;
+    const parts = timeStr.trim().split(/\s+/);
+    if (parts.length >= 2) {
+      return (
+        <div className="leading-tight">
+          <div className="font-semibold text-slate-700">{parts[0]}</div>
+          <div className="text-[10px] text-slate-400 font-normal mt-0.5">{parts.slice(1).join(' ')}</div>
+        </div>
+      );
+    }
+    return <span>{timeStr}</span>;
   };
 
   const handleCheckIn = () => {
@@ -149,14 +211,7 @@ export const UserH5View: React.FC<UserH5ViewProps> = ({
                 </thead>
                 <tbody className="divide-y divide-slate-100">
                   {(() => {
-                    const sorted = [...trackers].sort((a, b) => {
-                      const pA = parseFloat(a.changePercent?.replace('%', '') || '0');
-                      const pB = parseFloat(b.changePercent?.replace('%', '') || '0');
-                      return pB - pA;
-                    });
-                    const displayTrackers = sorted.length > 6 
-                      ? [...sorted.slice(0, 3), ...sorted.slice(-3)] 
-                      : sorted;
+                    const displayTrackers = liveTrackers;
 
                     return displayTrackers.map(t => {
                       const isUp = t.changePercent?.startsWith('+');
@@ -271,7 +326,9 @@ export const UserH5View: React.FC<UserH5ViewProps> = ({
                         return (
                           <React.Fragment key={ev.id || idx}>
                             <tr className="hover:bg-slate-50/50">
-                              <td className="py-2.5 px-3 text-[11px] text-slate-500 font-mono align-top w-24">{ev.time}</td>
+                              <td className="py-2.5 px-3 text-[11px] text-slate-500 font-mono align-top w-24">
+                                {renderDateTimeMultiline(ev.time)}
+                              </td>
                               <td className="py-2.5 px-3 align-top font-bold text-[#1B2A4E] text-xs">
                                 {ev.event}
                               </td>

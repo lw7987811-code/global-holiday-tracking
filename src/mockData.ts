@@ -3,7 +3,7 @@ import defaultBannerImg from './assets/images/hero_banner_default_1793254437266.
 
 export const initialConfig: AppConfig = {
   themeColor: 'blue',
-  heroTitle: '外盘数据早知道',
+  heroTitle: '假期外盘热点追踪',
   heroSub: '双节专题 · 假期不打烊',
   heroBannerImg: defaultBannerImg,
   updateTimeStr: '10月04日 22:00',

@@ -16,10 +16,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, setActiveTab }) => {
           </div>
           <div>
             <div className="flex items-center space-x-2">
-              <span className="font-bold text-lg tracking-wide">外盘数据早知道</span>
-              <span className="text-xs bg-amber-500/20 text-amber-300 px-2 py-0.5 rounded border border-amber-500/30">
-                期货产品中心
-              </span>
+              <span className="font-bold text-lg tracking-wide">假期外盘热点追踪</span>
             </div>
           </div>
         </div>
