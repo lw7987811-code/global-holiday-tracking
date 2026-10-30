@@ -1,6 +1,56 @@
 import { OverseasTrackerItem, AnalystComment, HolidayNewsItem, LiveStreamItem, CheckInDay, AppConfig } from './types';
 import defaultBannerImg from './assets/images/hero_banner_default_1793254437266.jpg';
 
+export const initialOverseasTrackers: OverseasTrackerItem[] = [
+  { id: 'tracker-1', exchange: 'COMEX', name: '黄金', focusType: 'opportunity', focusText: '', lastPrice: '2658.4', changePercent: '+1.25%' },
+  { id: 'tracker-2', exchange: 'NYMEX', name: 'WTI原油', focusType: 'opportunity', focusText: '', lastPrice: '71.45', changePercent: '+0.85%' },
+  { id: 'tracker-3', exchange: 'LME', name: '伦铜', focusType: 'opportunity', focusText: '', lastPrice: '9845.0', changePercent: '-0.32%' },
+  { id: 'tracker-4', exchange: 'CBOT', name: '美豆', focusType: 'risk', focusText: '', lastPrice: '1024.5', changePercent: '-1.15%' },
+  { id: 'tracker-5', exchange: 'NYMEX', name: '天然气', focusType: 'risk', focusText: '', lastPrice: '2.458', changePercent: '-2.45%' },
+  { id: 'tracker-6', exchange: 'ICUS', name: '美元指数', focusType: 'opportunity', focusText: '', lastPrice: '101.45', changePercent: '+0.12%' },
+];
+
+export const DEFAULT_SYSTEM_TRACKERS: OverseasTrackerItem[] = [
+  { id: 'sys-1', exchange: 'COMEX', name: '黄金', focusType: 'opportunity', focusText: '', lastPrice: '2658.4', changePercent: '+1.25%' },
+  { id: 'sys-2', exchange: 'NYMEX', name: 'WTI原油', focusType: 'opportunity', focusText: '', lastPrice: '71.45', changePercent: '+0.85%' },
+  { id: 'sys-3', exchange: 'LME', name: '伦铜', focusType: 'opportunity', focusText: '', lastPrice: '9845.0', changePercent: '-0.32%' },
+  { id: 'sys-4', exchange: 'CBOT', name: '美豆', focusType: 'risk', focusText: '', lastPrice: '1024.5', changePercent: '-1.15%' },
+  { id: 'sys-5', exchange: 'NYMEX', name: '天然气', focusType: 'risk', focusText: '', lastPrice: '2.458', changePercent: '-2.45%' },
+  { id: 'sys-6', exchange: 'ICUS', name: '美元指数', focusType: 'opportunity', focusText: '', lastPrice: '101.45', changePercent: '+0.12%' },
+  { id: 'sys-7', exchange: 'COMEX', name: '白银', focusType: 'neutral', focusText: '', lastPrice: '31.25', changePercent: '+0.50%' },
+  { id: 'sys-8', exchange: 'ICEU', name: '布伦特原油', focusType: 'opportunity', focusText: '', lastPrice: '75.20', changePercent: '+0.70%' },
+  { id: 'sys-9', exchange: 'CME', name: '标普500', focusType: 'opportunity', focusText: '', lastPrice: '5750.2', changePercent: '+0.35%' },
+];
+
+export function getEffectiveTrackers(configuredTrackers?: OverseasTrackerItem[]): OverseasTrackerItem[] {
+  const result: OverseasTrackerItem[] = [];
+  const addedKeys = new Set<string>();
+
+  if (configuredTrackers && configuredTrackers.length > 0) {
+    for (const item of configuredTrackers) {
+      if (result.length >= 6) break;
+      const key = `${item.exchange}-${item.name}`.trim();
+      if (!addedKeys.has(key)) {
+        addedKeys.add(key);
+        result.push(item);
+      }
+    }
+  }
+
+  if (result.length < 6) {
+    for (const sysItem of DEFAULT_SYSTEM_TRACKERS) {
+      if (result.length >= 6) break;
+      const key = `${sysItem.exchange}-${sysItem.name}`.trim();
+      if (!addedKeys.has(key)) {
+        addedKeys.add(key);
+        result.push(sysItem);
+      }
+    }
+  }
+
+  return result;
+}
+
 export const initialConfig: AppConfig = {
   themeColor: 'blue',
   heroTitle: '假期外盘热点追踪',
@@ -9,6 +59,7 @@ export const initialConfig: AppConfig = {
   updateTimeStr: '10月04日 22:00',
   fallbackFocusType: '',
   fallbackFocusText: '',
+  coreTrackers: initialOverseasTrackers,
   globalEvents: [
     { id: 'ge-1', time: '9月30日 9:30', event: '中国9月官方制造业PMI', details: '制造业PMI是衡量制造业景气程度的先行指标，以50%为荣枯线。关注公布值与预测值的比较，如果高于预测值，短期市场情绪或受提振；同时关注分项指数变化。', impact: '国内工业品' },
     { id: 'ge-2', time: '9月30日 20:15', event: '美国9月ADP就业人数', details: 'ADP数据反映美国私营部门的就业人数月度变化，也称为“小非农”。关注公布值与预测值的比较，如果高于预测值，或将对贵金属、有色价格短期形成一定压制作用。', impact: '贵金属、有色等' },
@@ -22,15 +73,6 @@ export const initialConfig: AppConfig = {
     { id: 'ge-10', time: '假期期间持续关注', event: '美联储官员讲话', details: '9月FOMC会议加息落地，同时上修点阵图。美联储官员讲话或将影响市场对利率路径的预期。如果讲话偏鹰，强调通胀高企，或对黄金短期形成一定压力；如果讲话偏鸽，暗示通胀可控，或为贵金属提供喘息之机。同时也需关注其他因素的影响，如地缘局势变化、美国经济数据表现等。', impact: '贵金属、有色等' },
   ],
 };
-
-export const initialOverseasTrackers: OverseasTrackerItem[] = [
-  { id: 'tracker-1', exchange: 'COMEX', name: '黄金', focusType: 'opportunity', focusText: '', lastPrice: '2658.4', changePercent: '+1.25%' },
-  { id: 'tracker-2', exchange: 'NYMEX', name: 'WTI原油', focusType: 'opportunity', focusText: '', lastPrice: '71.45', changePercent: '+0.85%' },
-  { id: 'tracker-3', exchange: 'LME', name: '伦铜', focusType: 'opportunity', focusText: '', lastPrice: '9845.0', changePercent: '-0.32%' },
-  { id: 'tracker-4', exchange: 'CBOT', name: '美豆', focusType: 'risk', focusText: '', lastPrice: '1024.5', changePercent: '-1.15%' },
-  { id: 'tracker-5', exchange: 'NYMEX', name: '天然气', focusType: 'risk', focusText: '', lastPrice: '2.458', changePercent: '-2.45%' },
-  { id: 'tracker-6', exchange: 'ICUS', name: '美元指数', focusType: 'opportunity', focusText: '', lastPrice: '101.45', changePercent: '+0.12%' },
-];
 
 export const initialAnalysts: AnalystComment[] = [
   {

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AppConfig, OverseasTrackerItem } from '../types';
-import { Settings, Plus, Trash2, Edit2, Save, Check, Image as ImageIcon, Palette, Globe, ChevronRight, Home, Layout, FileText, Search, User, Bell, Calendar, Mail, MessageSquare } from 'lucide-react';
+import { Settings, Plus, Trash2, Edit2, Save, Check, Image as ImageIcon, Palette, Globe, ChevronRight, Home, Layout, FileText, Search, User, Bell, Calendar, Mail, MessageSquare, TrendingUp } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 interface OperationConsoleProps {
@@ -24,6 +24,24 @@ const getProductsByExchange = (exchange: string): string[] => {
   return mapping[exchange] || [];
 };
 
+const PRODUCT_PRICE_PRESETS: Record<string, { lastPrice: string; changePercent: string }> = {
+  '黄金': { lastPrice: '2658.4', changePercent: '+1.25%' },
+  '白银': { lastPrice: '31.25', changePercent: '+0.50%' },
+  'WTI原油': { lastPrice: '71.45', changePercent: '+0.85%' },
+  '天然气': { lastPrice: '2.458', changePercent: '-2.45%' },
+  '伦铜': { lastPrice: '9845.0', changePercent: '-0.32%' },
+  '伦铝': { lastPrice: '2540.0', changePercent: '+0.20%' },
+  '美豆': { lastPrice: '1024.5', changePercent: '-1.15%' },
+  '美玉米': { lastPrice: '412.5', changePercent: '-0.50%' },
+  '美小麦': { lastPrice: '580.0', changePercent: '-0.80%' },
+  '美元指数': { lastPrice: '101.45', changePercent: '+0.12%' },
+  '棉花': { lastPrice: '72.80', changePercent: '-0.10%' },
+  '布伦特原油': { lastPrice: '75.20', changePercent: '+0.70%' },
+  '可可': { lastPrice: '7450.0', changePercent: '+2.10%' },
+  '标普500': { lastPrice: '5750.2', changePercent: '+0.35%' },
+  '纳指': { lastPrice: '18320.0', changePercent: '+0.45%' },
+};
+
 export const OperationConsole: React.FC<OperationConsoleProps> = ({
   config,
   setConfig,
@@ -37,9 +55,10 @@ export const OperationConsole: React.FC<OperationConsoleProps> = ({
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [excelNotice, setExcelNotice] = useState<string | null>(null);
 
-  // New tracker state (Top Form)
-  const [newExchange, setNewExchange] = useState<'' | 'CBOT' | 'CME' | 'COMEX' | 'NYMEX' | 'ICUS' | 'ICEU' | 'LME'>('');
-  const [newName, setNewName] = useState('');
+  // Core Trackers State
+  const coreList = config.coreTrackers || trackers || [];
+  const [coreExchange, setCoreExchange] = useState<'' | 'CBOT' | 'CME' | 'COMEX' | 'NYMEX' | 'ICUS' | 'ICEU' | 'LME'>('');
+  const [coreNameSelect, setCoreNameSelect] = useState<string>('');
 
   const handleBannerUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -68,6 +87,7 @@ export const OperationConsole: React.FC<OperationConsoleProps> = ({
     const updatedConfig = {
       ...config,
       heroBannerImg: bannerImage,
+      coreTrackers: coreList,
     };
     setConfig(updatedConfig);
     if (onPublishConfig) {
@@ -77,36 +97,55 @@ export const OperationConsole: React.FC<OperationConsoleProps> = ({
     setTimeout(() => setSaveToast(false), 3000);
   };
 
-  const addTracker = () => {
-    if (!newName || !newExchange) return;
-    
-    const normName = newName.trim();
-    const existingIndex = trackers.findIndex(t => t.name.trim() === normName);
-    
-    const newItem: OverseasTrackerItem = {
-      id: existingIndex >= 0 ? trackers[existingIndex].id : `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      exchange: newExchange as 'CBOT' | 'CME' | 'COMEX' | 'NYMEX' | 'ICUS' | 'ICEU' | 'LME',
-      name: normName,
-      focusType: 'opportunity',
-      focusText: '',
-      lastPrice: '--',
-      changePercent: '0.00%',
-    };
-
-    if (existingIndex >= 0) {
-      const nextTrackers = [...trackers];
-      nextTrackers[existingIndex] = newItem;
-      setTrackers(nextTrackers);
-    } else {
-      setTrackers([...trackers, newItem]);
+  const handleAddCoreProduct = () => {
+    if (!coreExchange) {
+      setErrorMsg('配置失败：请先选择交易所！');
+      return;
+    }
+    const finalName = coreNameSelect.trim();
+    if (!finalName) {
+      setErrorMsg('配置失败：请选择外盘品种！');
+      return;
     }
 
-    setNewExchange('');
-    setNewName('');
+    const exists = coreList.some(
+      item => item.exchange === coreExchange && item.name === finalName
+    );
+    if (exists) {
+      setErrorMsg(`交易所 ${coreExchange} 下已存在核心品种 【${finalName}】，请勿重复添加！`);
+      return;
+    }
+
+    const preset = PRODUCT_PRICE_PRESETS[finalName] || { lastPrice: '100.00', changePercent: '+0.00%' };
+
+    const newItem: OverseasTrackerItem = {
+      id: `core-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`,
+      exchange: coreExchange,
+      name: finalName,
+      focusType: 'opportunity',
+      focusText: '',
+      lastPrice: preset.lastPrice,
+      changePercent: preset.changePercent,
+    };
+
+    const nextCoreList = [...coreList, newItem];
+    setConfig(prev => ({
+      ...prev,
+      coreTrackers: nextCoreList,
+    }));
+    setTrackers(nextCoreList);
+    setErrorMsg(null);
+
+    setCoreNameSelect('');
   };
 
-  const deleteTracker = (id: string) => {
-    setTrackers(trackers.filter(t => t.id !== id));
+  const handleDeleteCoreProduct = (id: string) => {
+    const nextCoreList = coreList.filter(item => item.id !== id);
+    setConfig(prev => ({
+      ...prev,
+      coreTrackers: nextCoreList,
+    }));
+    setTrackers(nextCoreList);
   };
 
   return (
@@ -321,12 +360,145 @@ export const OperationConsole: React.FC<OperationConsoleProps> = ({
             </div>
           </div>
 
-          {/* Config Section 3: Global Events Excel Upload & Preview */}
+          {/* Config Section 3: Overseas Core Product Config */}
+          <div className="bg-white p-6 rounded-xl shadow-xs border border-slate-200 space-y-4">
+            <div className="flex items-center justify-between border-b border-slate-100 pb-3">
+              <div className="flex items-center space-x-2 font-bold text-slate-900 text-sm">
+                <TrendingUp className="w-4 h-4 text-[#1B6EEB]" />
+                <span>3. 外盘核心品种配置</span>
+              </div>
+            </div>
+
+            {/* Form to add core product */}
+            <div className="p-4 bg-slate-50 rounded-lg border border-slate-200 space-y-3">
+              <div className="text-xs font-bold text-slate-800 flex items-center space-x-1.5">
+                <Plus className="w-4 h-4 text-[#1B6EEB]" />
+                <span>配置外盘核心品种</span>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                {/* 交易所 */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">1. 交易所</label>
+                  <select
+                    value={coreExchange}
+                    onChange={e => {
+                      const val = e.target.value as any;
+                      setCoreExchange(val);
+                      setCoreNameSelect('');
+                    }}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white font-medium focus:outline-none focus:border-[#1B6EEB]"
+                  >
+                    <option value="">-- 请选择交易所 --</option>
+                    <option value="CBOT">CBOT</option>
+                    <option value="CME">CME</option>
+                    <option value="COMEX">COMEX</option>
+                    <option value="NYMEX">NYMEX</option>
+                    <option value="ICUS">ICUS</option>
+                    <option value="ICEU">ICEU</option>
+                    <option value="LME">LME</option>
+                  </select>
+                </div>
+
+                {/* 品种 */}
+                <div>
+                  <label className="block text-[11px] font-semibold text-slate-600 mb-1">2. 品种</label>
+                  <select
+                    value={coreNameSelect}
+                    onChange={e => setCoreNameSelect(e.target.value)}
+                    disabled={!coreExchange}
+                    className="w-full px-3 py-2 rounded-lg border border-slate-300 text-xs bg-white font-medium focus:outline-none focus:border-[#1B6EEB] disabled:opacity-50 disabled:bg-slate-100"
+                  >
+                    <option value="">{coreExchange ? '-- 请选择品种 --' : '请先选择交易所'}</option>
+                    {getProductsByExchange(coreExchange).map(p => (
+                      <option key={p} value={p}>{p}</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* 添加按钮 */}
+                <div className="flex items-end">
+                  <button
+                    onClick={handleAddCoreProduct}
+                    className="w-full bg-[#1B6EEB] hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-bold shadow-xs transition-colors flex items-center justify-center space-x-1 cursor-pointer"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>添加</span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            {/* Configured Table */}
+            <div className="border border-slate-200 rounded-lg overflow-hidden">
+              <div className="bg-slate-100 px-3 py-2 text-xs font-bold text-slate-700 border-b border-slate-200 flex justify-between items-center">
+                <span>核心品种（已配置 {coreList.length} 个）</span>
+                {coreList.length > 0 && (
+                  <button
+                    onClick={() => {
+                      setConfig(prev => ({ ...prev, coreTrackers: [] }));
+                      setTrackers([]);
+                    }}
+                    className="text-xs text-rose-600 hover:text-rose-800 font-medium cursor-pointer"
+                  >
+                    清空
+                  </button>
+                )}
+              </div>
+
+              <div className="max-h-[300px] overflow-y-auto">
+                <table className="w-full text-left text-xs border-collapse">
+                  <thead className="bg-slate-50 text-slate-600 sticky top-0 border-b border-slate-200">
+                    <tr>
+                      <th className="p-2.5 w-16 text-center">序号</th>
+                      <th className="p-2.5 w-28">交易所</th>
+                      <th className="p-2.5">品种</th>
+                      <th className="p-2.5 w-20 text-right">操作</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100">
+                    {coreList.length === 0 ? (
+                      <tr>
+                        <td colSpan={4} className="p-6 text-center text-slate-400">
+                          暂未配置核心品种，请通过上方的“交易所”与“品种”下拉框选择并添加。
+                        </td>
+                      </tr>
+                    ) : (
+                      coreList.map((item, index) => {
+                        return (
+                          <tr key={item.id} className="hover:bg-slate-50">
+                            <td className="p-2.5 text-center font-mono font-semibold text-slate-500">{index + 1}</td>
+                            <td className="p-2.5">
+                              <span className="px-2 py-0.5 rounded bg-slate-200 text-slate-700 font-mono font-bold text-[11px]">
+                                {item.exchange}
+                              </span>
+                            </td>
+                            <td className="p-2.5 font-bold text-slate-800">{item.name}</td>
+                            <td className="p-2.5 text-right">
+                              <button
+                                onClick={() => handleDeleteCoreProduct(item.id)}
+                                className="p-1 rounded text-slate-400 hover:text-rose-600 hover:bg-rose-50 cursor-pointer"
+                                title="删除"
+                              >
+                                <Trash2 className="w-3.5 h-3.5 inline" />
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          {/* Config Section 4: Global Events Excel Upload & Preview */}
           <div className="bg-white p-6 rounded-xl shadow-xs border border-slate-200 space-y-4">
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center space-x-2 font-bold text-slate-900 text-sm">
                 <Globe className="w-4 h-4 text-[#1B6EEB]" />
-                <span>3. 全球事件</span>
+                <span>4. 全球事件</span>
               </div>
             </div>
 

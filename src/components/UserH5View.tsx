@@ -1,5 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { AppConfig, OverseasTrackerItem, AnalystComment, HolidayNewsItem, LiveStreamItem, CheckInDay } from '../types';
+import { getEffectiveTrackers } from '../mockData';
 import { Headphones, Check, Play, ChevronDown } from 'lucide-react';
 
 interface UserH5ViewProps {
@@ -33,12 +34,17 @@ export const UserH5View: React.FC<UserH5ViewProps> = ({
   const [activeAnalystIdx, setActiveAnalystIdx] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // Derive effective 6 trackers (prioritize config.coreTrackers, backfill with system defaults)
+  const effectiveTrackers = useMemo(() => {
+    return getEffectiveTrackers(config.coreTrackers || trackers);
+  }, [config.coreTrackers, trackers]);
+
   // Real-time market tick state
-  const [liveTrackers, setLiveTrackers] = useState<OverseasTrackerItem[]>(trackers);
+  const [liveTrackers, setLiveTrackers] = useState<OverseasTrackerItem[]>(effectiveTrackers);
 
   useEffect(() => {
-    setLiveTrackers(trackers);
-  }, [trackers]);
+    setLiveTrackers(effectiveTrackers);
+  }, [effectiveTrackers]);
 
   useEffect(() => {
     const timer = setInterval(() => {

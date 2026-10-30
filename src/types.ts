@@ -75,4 +75,5 @@ export interface AppConfig {
   fallbackFocusType: '' | 'opportunity' | 'risk' | 'neutral';
   fallbackFocusText: string;
   globalEvents: GlobalEventItem[];
+  coreTrackers?: OverseasTrackerItem[];
 }
