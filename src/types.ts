@@ -48,6 +48,7 @@ export interface LiveStreamItem {
   heat?: number;
   status: 'upcoming' | 'live' | 'ended';
   avatarLetter: string;
+  coverUrl?: string;
 }
 
 export interface CheckInDay {

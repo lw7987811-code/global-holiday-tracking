@@ -30,7 +30,7 @@ export const UserH5View: React.FC<UserH5ViewProps> = ({
 }) => {
   const [newsTagFilter, setNewsTagFilter] = useState<string>('全部');
   const [toastMessage, setToastMessage] = useState<string | null>(null);
-  const [expandedEventIds, setExpandedEventIds] = useState<string[]>([]);
+  const [expandedEventId, setExpandedEventId] = useState<string | null>(null);
   const [activeAnalystIdx, setActiveAnalystIdx] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -328,9 +328,10 @@ export const UserH5View: React.FC<UserH5ViewProps> = ({
                   <table className="w-full text-xs border-collapse">
                     <tbody className="divide-y divide-slate-100">
                       {(config.globalEvents || []).map((ev, idx) => {
-                        const isExpanded = expandedEventIds.includes(ev.id || String(idx));
+                        const eventKey = ev.id || String(idx);
+                        const isExpanded = expandedEventId === eventKey;
                         return (
-                          <React.Fragment key={ev.id || idx}>
+                          <React.Fragment key={eventKey}>
                             <tr className="hover:bg-slate-50/50">
                               <td className="py-2.5 px-3 text-[11px] text-slate-500 font-mono align-top w-24">
                                 {renderDateTimeMultiline(ev.time)}
@@ -343,10 +344,7 @@ export const UserH5View: React.FC<UserH5ViewProps> = ({
                                 {ev.details && (
                                   <button
                                     onClick={() => {
-                                      const id = ev.id || String(idx);
-                                      setExpandedEventIds(prev => 
-                                        prev.includes(id) ? prev.filter(item => item !== id) : [...prev, id]
-                                      );
+                                      setExpandedEventId(prev => (prev === eventKey ? null : eventKey));
                                     }}
                                     className="mt-1 inline-flex items-center text-[10px] font-medium text-[#1B6EEB] hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-1.5 py-0.5 rounded cursor-pointer transition-colors"
                                   >
@@ -422,124 +420,124 @@ export const UserH5View: React.FC<UserH5ViewProps> = ({
               </div>
             </div>
 
-            {/* Live Streams Layout matching mockups */}
+            {/* Horizontal Scrolling Small Cards (≥2 items layout) */}
             {(() => {
-              const mainUpcoming = liveStreams.find(l => l.type === 'upcoming') || liveStreams[0];
-              const replayItem = liveStreams.find(l => l.type === 'replay') || liveStreams[1];
-              const nextUpcoming = liveStreams.filter(l => l.type === 'upcoming')[1] || liveStreams[2] || liveStreams[0];
+              const statusPriority: Record<string, number> = {
+                live: 1,
+                upcoming: 2,
+                ended: 3,
+                replay: 3,
+              };
+
+              const sortedLiveStreams = [...liveStreams].sort((a, b) => {
+                const pA = statusPriority[a.status] || 99;
+                const pB = statusPriority[b.status] || 99;
+                if (pA !== pB) return pA - pB;
+                return (a.startTime || '').localeCompare(b.startTime || '');
+              });
 
               return (
-                <div className="space-y-3">
-                  {/* Big Card - Upcoming */}
-                  {mainUpcoming && (
-                    <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_20px_rgba(27,42,78,0.08)] border border-slate-100 flex flex-col">
-                      {/* Top Blue Gradient Banner */}
-                      <div className="relative bg-gradient-to-r from-blue-400 via-blue-500 to-indigo-600 p-4 text-white overflow-hidden">
-                        <div className="flex items-center space-x-2 mb-2">
-                          <span className="bg-[#E67E22] text-white text-[10px] font-bold px-2 py-0.5 rounded">预告</span>
-                          <span className="bg-black/30 backdrop-blur-xs text-[10px] px-2 py-0.5 rounded font-mono">{mainUpcoming.startTime}</span>
-                        </div>
-                        <h4 className="text-2xl font-black tracking-wider drop-shadow-sm">{mainUpcoming.shortTitle}</h4>
-                      </div>
+                <div className="flex space-x-3 overflow-x-auto pb-3 pt-1 px-0.5 no-scrollbar snap-x snap-mandatory">
+                  {sortedLiveStreams.map((item) => {
+                    const isLive = item.status === 'live';
+                    const isUpcoming = item.status === 'upcoming';
+                    const isReplay = item.status === 'ended' || item.type === 'replay';
 
-                      {/* Bottom White Card Part */}
-                      <div className="p-3.5 flex flex-col justify-between flex-1">
-                        <h5 className="text-xs font-bold text-slate-800 line-clamp-2 leading-relaxed mb-3">
-                          {mainUpcoming.title}
-                        </h5>
-                        <div className="flex items-center justify-between pt-2 border-t border-slate-100">
-                          <div className="flex items-center space-x-1.5 text-slate-600 text-xs">
-                            <div className="w-5 h-5 rounded-full bg-blue-500 text-white flex items-center justify-center text-[10px]">
-                              📺
+                    return (
+                      <div
+                        key={item.id}
+                        className="w-[168px] shrink-0 snap-start bg-white rounded-2xl overflow-hidden shadow-[0_4px_16px_rgba(27,42,78,0.06)] border border-slate-100 flex flex-col justify-between"
+                      >
+                        {/* Top Cover / Header Graphic */}
+                        <div className="relative h-[110px] w-full overflow-hidden bg-slate-800">
+                          {item.coverUrl ? (
+                            <img src={item.coverUrl} alt="" className="w-full h-full object-cover" />
+                          ) : (
+                            <div className={`w-full h-full flex flex-col justify-end p-3 text-white ${
+                              isLive
+                                ? 'bg-gradient-to-br from-orange-500 via-rose-600 to-amber-600'
+                                : isUpcoming
+                                ? 'bg-gradient-to-br from-amber-500 via-orange-500 to-red-500'
+                                : 'bg-gradient-to-br from-slate-700 via-slate-800 to-slate-900'
+                            }`}>
+                              <h4 className="text-lg font-black tracking-wider line-clamp-1 drop-shadow">{item.shortTitle}</h4>
                             </div>
-                            <span className="font-medium">{mainUpcoming.speaker}</span>
-                          </div>
-                          <button
-                            onClick={() => handleReserveLive(mainUpcoming.title)}
-                            className="px-5 py-1.5 border border-[#E67E22] text-[#E67E22] text-xs rounded-full font-bold hover:bg-amber-50 transition-colors cursor-pointer"
-                          >
-                            预约
-                          </button>
-                        </div>
-                      </div>
-                    </div>
-                  )}
+                          )}
 
-                  {/* Small Cards Grid (2 columns) */}
-                  <div className="grid grid-cols-2 gap-3 items-stretch">
-                    {/* Left Small Card - Replay */}
-                    {replayItem && (
-                      <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_16px_rgba(27,42,78,0.06)] border border-slate-100 flex flex-col justify-between h-full">
-                        {/* Top Dark Banner */}
-                        <div className="relative bg-gradient-to-r from-slate-800 to-slate-900 p-3 text-white overflow-hidden flex flex-col justify-between flex-1">
-                          <div>
-                            <div className="flex items-center justify-between mb-1.5">
-                              <div className="flex items-center space-x-1">
-                                <span className="bg-slate-600 text-white text-[9px] font-bold px-1.5 py-0.5 rounded">回放</span>
-                                <span className="text-[9px] text-slate-300 font-mono">{replayItem.startTime}</span>
+                          {/* Top-Left Status Badge */}
+                          {isLive && (
+                            <div className="absolute top-2 left-2 flex items-center space-x-1.5 bg-[#FF5500] text-white text-[10px] font-bold px-2 py-0.5 rounded-full shadow-md z-10">
+                              <span className="flex space-x-0.5 items-center">
+                                <span className="w-0.5 h-2 bg-white rounded-full animate-pulse"></span>
+                                <span className="w-0.5 h-3 bg-white rounded-full animate-pulse delay-75"></span>
+                                <span className="w-0.5 h-1.5 bg-white rounded-full animate-pulse delay-150"></span>
+                              </span>
+                              <span>直播中</span>
+                            </div>
+                          )}
+
+                          {isUpcoming && (
+                            <div className="absolute top-2 left-2 flex items-center overflow-hidden rounded-md text-white text-[10px] shadow-sm z-10">
+                              <span className="bg-[#FF6B00] font-bold px-1.5 py-0.5">预告</span>
+                              <span className="bg-black/60 backdrop-blur-xs px-1.5 py-0.5 font-mono text-[9.5px]">
+                                {item.startTime}
+                              </span>
+                            </div>
+                          )}
+
+                          {isReplay && (
+                            <div className="absolute top-2 left-2 flex items-center overflow-hidden rounded-md text-white text-[10px] shadow-sm z-10">
+                              <span className="bg-slate-700/90 backdrop-blur-xs font-bold px-1.5 py-0.5">回放</span>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Card Body */}
+                        <div className="p-3 flex flex-col justify-between flex-1">
+                          <h5 className="text-[12px] font-bold text-slate-900 line-clamp-2 leading-snug h-[34px] mb-2">
+                            {item.title}
+                          </h5>
+
+                          {/* Card Footer: Speaker TV icon & CTA button */}
+                          <div className="flex items-center justify-between pt-2 border-t border-slate-100">
+                            <div className="flex items-center space-x-1 text-slate-600 text-xs shrink-0 max-w-[85px] truncate">
+                              <div className="w-4 h-4 rounded-full bg-[#1B6EEB] text-white flex items-center justify-center text-[9px] shrink-0">
+                                📺
                               </div>
-                              <span className="text-[8px] bg-amber-500/20 text-amber-300 px-1.5 py-0.5 rounded border border-amber-500/30">R3</span>
+                              <span className="text-[11px] font-medium text-slate-700 truncate">{item.speaker.split('·')[0]}</span>
                             </div>
-                            <h5 className="text-xs font-bold truncate">{replayItem.shortTitle}</h5>
-                          </div>
-                          <div className="mt-2 text-[9px] text-amber-400 font-mono flex items-center">
-                            🔥 热度 {replayItem.heat || 1601}
-                          </div>
-                        </div>
 
-                        {/* Bottom White Part */}
-                        <div className="p-3 flex flex-col justify-between">
-                          <h6 className="text-[11px] font-bold text-slate-800 line-clamp-2 leading-tight mb-2 min-h-[2rem]">
-                            {replayItem.title}
-                          </h6>
-                          <div className="text-[10px] text-slate-500 truncate flex items-center space-x-1 pt-1.5 border-t border-slate-100">
-                            <span className="w-4 h-4 rounded-full bg-blue-500 text-white flex items-center justify-center text-[8px] shrink-0">📺</span>
-                            <span className="truncate">{replayItem.speaker}</span>
+                            {isLive && (
+                              <button
+                                onClick={() => showToast(`正在进入直播：《${item.title}》`)}
+                                className="px-2.5 py-1 bg-[#FFF2EC] text-[#FF5500] text-[10.5px] font-bold rounded-full hover:bg-orange-100 transition-colors cursor-pointer shrink-0"
+                              >
+                                去观看
+                              </button>
+                            )}
+
+                            {isUpcoming && (
+                              <button
+                                onClick={() => handleReserveLive(item.title)}
+                                className="px-2.5 py-1 bg-white border border-[#FF6B00] text-[#FF6B00] text-[10.5px] font-bold rounded-full hover:bg-orange-50 transition-colors cursor-pointer shrink-0"
+                              >
+                                预约
+                              </button>
+                            )}
+
+                            {isReplay && (
+                              <button
+                                onClick={() => showToast(`正在播放回放：《${item.title}》`)}
+                                className="px-2.5 py-1 bg-blue-50 text-[#1B6EEB] text-[10.5px] font-bold rounded-full hover:bg-blue-100 transition-colors cursor-pointer shrink-0"
+                              >
+                                看回放
+                              </button>
+                            )}
                           </div>
                         </div>
                       </div>
-                    )}
-
-                    {/* Right Small Card - Next Upcoming */}
-                    {nextUpcoming && (
-                      <div className="bg-white rounded-2xl overflow-hidden shadow-[0_4px_16px_rgba(27,42,78,0.06)] border border-slate-100 flex flex-col justify-between h-full">
-                        {/* Top Blue Banner */}
-                        <div className="relative bg-gradient-to-r from-blue-500 to-indigo-600 p-3 text-white overflow-hidden flex flex-col justify-between flex-1">
-                          <div>
-                            <div className="flex items-center justify-between mb-1.5">
-                              <div className="flex items-center space-x-1">
-                                <span className="bg-[#E67E22] text-white text-[9px] font-bold px-1.5 py-0.5 rounded">预告</span>
-                                <span className="text-[9px] text-blue-100 font-mono">{nextUpcoming.startTime}</span>
-                              </div>
-                            </div>
-                            <h5 className="text-xs font-bold truncate">{nextUpcoming.shortTitle}</h5>
-                          </div>
-                          <div className="mt-2 text-[9px] opacity-0 select-none">
-                            占位
-                          </div>
-                        </div>
-
-                        {/* Bottom White Part */}
-                        <div className="p-3 flex flex-col justify-between">
-                          <h6 className="text-[11px] font-bold text-slate-800 line-clamp-2 leading-tight mb-2 min-h-[2rem]">
-                            {nextUpcoming.title}
-                          </h6>
-                          <div className="flex items-center justify-between pt-1.5 border-t border-slate-100">
-                            <div className="text-[10px] text-slate-500 truncate flex items-center space-x-1">
-                              <span className="w-4 h-4 rounded-full bg-blue-500 text-white flex items-center justify-center text-[8px] shrink-0">📺</span>
-                              <span className="truncate">{nextUpcoming.speaker}</span>
-                            </div>
-                            <button
-                              onClick={() => handleReserveLive(nextUpcoming.title)}
-                              className="px-2.5 py-0.5 border border-[#E67E22] text-[#E67E22] text-[10px] rounded-full font-bold hover:bg-amber-50 cursor-pointer shrink-0"
-                            >
-                              预约
-                            </button>
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                    );
+                  })}
                 </div>
               );
             })()}
@@ -680,7 +678,7 @@ export const UserH5View: React.FC<UserH5ViewProps> = ({
           <footer className="mt-4 px-6 py-6 text-center bg-gradient-to-b from-[#F7F4EC] to-[#EDE7DA] border-t border-slate-200/60">
             <p className="text-[10px] text-slate-500 leading-relaxed text-center">
               <strong className="text-[#1B2A4E] block mb-1">投资有风险，入市需谨慎</strong>
-              本文所有内容在任何情况下均不构成对任何人的投资建议，仅用于交流学习，投资者据此做出的任何投资的一切后果由投资者个人承担。
+              本页面所有内容在任何情况下均不构成对任何人的投资建议，仅用于交流学习，投资者据此做出的任何投资的一切后果由投资者个人承担。
             </p>
           </footer>
 

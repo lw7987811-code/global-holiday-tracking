@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { AppConfig, OverseasTrackerItem } from '../types';
-import { Settings, Plus, Trash2, Edit2, Save, Check, Image as ImageIcon, Palette, Globe, ChevronRight, Home, Layout, FileText, Search, User, Bell, Calendar, Mail, MessageSquare, TrendingUp } from 'lucide-react';
+import { Settings, Plus, Trash2, Edit2, Save, Check, Image as ImageIcon, Palette, Globe, ChevronRight, Home, Layout, FileText, Search, User, Bell, Calendar, Mail, MessageSquare, TrendingUp, Download } from 'lucide-react';
 import * as XLSX from 'xlsx';
 
 interface OperationConsoleProps {
@@ -508,8 +508,20 @@ export const OperationConsole: React.FC<OperationConsoleProps> = ({
                   <div className="text-xs font-bold text-slate-800">上传 Excel 表格解析</div>
                   <div className="text-[11px] text-slate-500">表格需包含时间、事件、关注要点、影响品种4列</div>
                 </div>
-                <label className="inline-block bg-[#1B6EEB] hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer shadow-xs transition-colors">
-                  选择 Excel 文件上传
+                <div className="flex items-center space-x-2.5 shrink-0">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setExcelNotice('已触发下载“全球事件导入模板.xlsx”');
+                      setTimeout(() => setExcelNotice(null), 3000);
+                    }}
+                    className="bg-white hover:bg-slate-100 text-slate-700 border border-slate-300 px-3.5 py-2 rounded-lg text-xs font-semibold cursor-pointer shadow-xs transition-colors flex items-center space-x-1.5"
+                  >
+                    <Download className="w-3.5 h-3.5 text-slate-600" />
+                    <span>下载导入模板</span>
+                  </button>
+                  <label className="inline-block bg-[#1B6EEB] hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-xs font-semibold cursor-pointer shadow-xs transition-colors">
+                    选择 Excel 文件上传
                   <input
                     type="file"
                     accept=".xlsx, .xls, .csv"
@@ -573,6 +585,7 @@ export const OperationConsole: React.FC<OperationConsoleProps> = ({
                   />
                 </label>
               </div>
+            </div>
 
               {/* Preview Table */}
               <div className="border border-slate-200 rounded-lg overflow-hidden">
